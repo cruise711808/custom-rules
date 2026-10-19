@@ -1,0 +1,19 @@
+# 自定义代理
+
+# google play
+DOMAIN-SUFFIX,xn--ngstr-lra8j.com
+DOMAIN-SUFFIX,services.googleapis.cn
+DOMAIN-SUFFIX,ajay.app
+DOMAIN,returnyoutubedislikeapi.com
+
+# pikpak
+DOMAIN,mypikpak.com
+DOMAIN,mypikpak.net
+DOMAIN,user.mypikpak.com
+DOMAIN,access.mypikpak.com
+DOMAIN,gofile.io
+
+# others
+DOMAIN-SUFFIX,qichiyu.com
+DOMAIN-SUFFIX,vivaldi.net
+DOMAIN-SUFFIX,f95zone.to
