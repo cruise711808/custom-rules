@@ -1,6 +1,6 @@
 # clash_router.tpl - subconverter clash/mihomo base template (converted from F:\Projects\clash_router\clash-router.yaml)
 # nodes:      injected into "proxies: ~" from the subscription link (url= param)
-# groups:     generated from template/clash_router.ini custom_proxy_group (regions+SP -> destination {proxy,unlock,oversea,download} -> service groups -> Final); replaces "proxy-groups: ~"
+# groups:     generated from template/clash_router.ini custom_proxy_group (regions+SP -> destination {Proxy,Unlock,Oversea,Download} -> service groups -> Final); replaces "proxy-groups: ~"
 # rules:      kept as-is from this template (ini sets enable_rule_generator=false); custom-rules 6 classes + ls-* stay as rule-providers at the bottom
 # secrets:    NOT in this template (public repo): trojan-home password + sharvo.top certificate paths + dns policy "+.sharvo.top" (router /etc/nikki/mixin.yaml)
 #               and controller secret/authentication (uci) - merged in on the router when nikki generates config.yaml
@@ -129,9 +129,9 @@ dns:
   cache-algorithm: arc
   respect-rules: false
   fallback:
-    - "https://cloudflare-dns.com/dns-query#proxy"
-    - "https://dns.google/dns-query#proxy"
-    - "https://doh.opendns.com/dns-query#proxy"
+    - "https://cloudflare-dns.com/dns-query#Proxy"
+    - "https://dns.google/dns-query#Proxy"
+    - "https://doh.opendns.com/dns-query#Proxy"
   fallback-filter:
     geoip: true
     geoip-code: CN
@@ -175,9 +175,10 @@ dns:
     "ruleprovider:ls-apple": ["https://dns.alidns.com/dns-query", "https://doh.pub/dns-query"]
     "ruleprovider:ls-icloud": ["https://dns.alidns.com/dns-query", "https://doh.pub/dns-query"]
     "ruleprovider:ls-google": ["https://dns.alidns.com/dns-query", "https://doh.pub/dns-query"]
-    "ruleprovider:ls-proxy": ["https://cloudflare-dns.com/dns-query#proxy", "https://dns.google/dns-query#proxy"]
-    "ruleprovider:ls-gfw": ["https://cloudflare-dns.com/dns-query#proxy", "https://dns.google/dns-query#proxy"]
-    "ruleprovider:ls-tld-not-cn": ["https://cloudflare-dns.com/dns-query#proxy", "https://dns.google/dns-query#proxy"]
+    "ruleprovider:ls-proxy": ["https://cloudflare-dns.com/dns-query#Proxy", "https://dns.google/dns-query#Proxy"]
+    "ruleprovider:ls-gfw": ["https://cloudflare-dns.com/dns-query#Proxy", "https://dns.google/dns-query#Proxy"]
+    "ruleprovider:ls-tld-not-cn": ["https://cloudflare-dns.com/dns-query#Proxy", "https://dns.google/dns-query#Proxy"]
+    "+.sharvo.top": ["https://cloudflare-dns.com/dns-query#Proxy", "https://dns.google/dns-query#Proxy"]
   default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
@@ -201,10 +202,10 @@ rules:
   # ---- egress classes (custom-rules files) ----
   - RULE-SET,block,REJECT,no-resolve
   - RULE-SET,direct,DIRECT,no-resolve
-  - RULE-SET,download,download,no-resolve
-  - RULE-SET,oversea,oversea,no-resolve
-  - RULE-SET,unlock,unlock,no-resolve
-  - RULE-SET,proxy,proxy,no-resolve
+  - RULE-SET,download,Download,no-resolve
+  - RULE-SET,oversea,Oversea,no-resolve
+  - RULE-SET,unlock,Unlock,no-resolve
+  - RULE-SET,proxy,Proxy,no-resolve
   - IP-CIDR,172.110.32.0/21,YouTube,no-resolve
   - IP-CIDR,216.73.80.0/20,YouTube,no-resolve
   - IP-CIDR6,2620:120:e000::/40,YouTube,no-resolve
@@ -413,31 +414,31 @@ rules:
   - PROCESS-NAME,Music,Apple
   - PROCESS-NAME,News,Apple
   - PROCESS-NAME,TV,Apple
-  - IP-CIDR,13.32.0.0/15,proxy,no-resolve
-  - IP-CIDR,13.35.0.0/17,proxy,no-resolve
-  - IP-CIDR,18.184.0.0/15,proxy,no-resolve
-  - IP-CIDR,18.194.0.0/15,proxy,no-resolve
-  - IP-CIDR,18.208.0.0/13,proxy,no-resolve
-  - IP-CIDR,18.232.0.0/14,proxy,no-resolve
-  - IP-CIDR,52.200.0.0/13,proxy,no-resolve
-  - IP-CIDR,52.58.0.0/15,proxy,no-resolve
-  - IP-CIDR,52.74.0.0/16,proxy,no-resolve
-  - IP-CIDR,52.77.0.0/16,proxy,no-resolve
-  - IP-CIDR,52.84.0.0/15,proxy,no-resolve
-  - IP-CIDR,54.156.0.0/14,proxy,no-resolve
-  - IP-CIDR,54.226.0.0/15,proxy,no-resolve
-  - IP-CIDR,54.230.156.0/22,proxy,no-resolve
-  - IP-CIDR,54.93.0.0/16,proxy,no-resolve
-  - PROCESS-NAME,com.amazon.avod.thirdpartyclient,proxy
-  - IP-CIDR,103.2.30.0/23,proxy,no-resolve
-  - IP-CIDR,125.209.208.0/20,proxy,no-resolve
-  - IP-CIDR,147.92.128.0/17,proxy,no-resolve
-  - IP-CIDR,203.104.144.0/21,proxy,no-resolve
-  - IP-CIDR,109.239.140.0/24,proxy,no-resolve
-  - IP-CIDR,5.28.195.163/32,proxy,no-resolve
-  - IP-CIDR,5.28.195.205/32,proxy,no-resolve
-  - IP-CIDR,5.28.195.37/32,proxy,no-resolve
-  - IP-CIDR,91.108.0.0/16,proxy,no-resolve
+  - IP-CIDR,13.32.0.0/15,Proxy,no-resolve
+  - IP-CIDR,13.35.0.0/17,Proxy,no-resolve
+  - IP-CIDR,18.184.0.0/15,Proxy,no-resolve
+  - IP-CIDR,18.194.0.0/15,Proxy,no-resolve
+  - IP-CIDR,18.208.0.0/13,Proxy,no-resolve
+  - IP-CIDR,18.232.0.0/14,Proxy,no-resolve
+  - IP-CIDR,52.200.0.0/13,Proxy,no-resolve
+  - IP-CIDR,52.58.0.0/15,Proxy,no-resolve
+  - IP-CIDR,52.74.0.0/16,Proxy,no-resolve
+  - IP-CIDR,52.77.0.0/16,Proxy,no-resolve
+  - IP-CIDR,52.84.0.0/15,Proxy,no-resolve
+  - IP-CIDR,54.156.0.0/14,Proxy,no-resolve
+  - IP-CIDR,54.226.0.0/15,Proxy,no-resolve
+  - IP-CIDR,54.230.156.0/22,Proxy,no-resolve
+  - IP-CIDR,54.93.0.0/16,Proxy,no-resolve
+  - PROCESS-NAME,com.amazon.avod.thirdpartyclient,Proxy
+  - IP-CIDR,103.2.30.0/23,Proxy,no-resolve
+  - IP-CIDR,125.209.208.0/20,Proxy,no-resolve
+  - IP-CIDR,147.92.128.0/17,Proxy,no-resolve
+  - IP-CIDR,203.104.144.0/21,Proxy,no-resolve
+  - IP-CIDR,109.239.140.0/24,Proxy,no-resolve
+  - IP-CIDR,5.28.195.163/32,Proxy,no-resolve
+  - IP-CIDR,5.28.195.205/32,Proxy,no-resolve
+  - IP-CIDR,5.28.195.37/32,Proxy,no-resolve
+  - IP-CIDR,91.108.0.0/16,Proxy,no-resolve
   - IP-CIDR,182.254.116.0/24,DIRECT,no-resolve
   - IP-CIDR,203.205.238.0/23,DIRECT,no-resolve
   - IP-CIDR,203.205.254.0/23,DIRECT,no-resolve
@@ -447,10 +448,10 @@ rules:
   - RULE-SET,ls-icloud,DIRECT
   - RULE-SET,ls-google,DIRECT
   - RULE-SET,ls-direct,DIRECT
-  - RULE-SET,ls-proxy,proxy
-  - RULE-SET,ls-gfw,proxy
-  - RULE-SET,ls-tld-not-cn,proxy
-  - RULE-SET,ls-telegramcidr,proxy,no-resolve
+  - RULE-SET,ls-proxy,Proxy
+  - RULE-SET,ls-gfw,Proxy
+  - RULE-SET,ls-tld-not-cn,Proxy
+  - RULE-SET,ls-telegramcidr,Proxy,no-resolve
   - RULE-SET,ls-lancidr,DIRECT,no-resolve
   - RULE-SET,ls-cncidr,DIRECT,no-resolve
   - GEOIP,CN,DIRECT,no-resolve
@@ -471,6 +472,9 @@ listeners:
     port: 8444
     users:
       - username: home
+        password: ""
+    certificate: ""
+    private-key: ""
     proxy: DIRECT
 rule-providers:
   ls-direct:
