@@ -2,8 +2,8 @@
 # nodes:      injected into "proxies: ~" from the subscription link (url= param)
 # groups:     generated from template/clash_router.ini custom_proxy_group (regions+SP -> destination {proxy,unlock,oversea,download} -> service groups -> Final); replaces "proxy-groups: ~"
 # rules:      kept as-is from this template (ini sets enable_rule_generator=false); custom-rules 6 classes + ls-* stay as rule-providers at the bottom
-# secrets:    NOT in this template (public repo) - supplied on router side by nikki mixin (uci nikki.mixin secret/authentication + /etc/nikki/mixin.yaml
-#               listeners trojan-home(password + /etc/ssl/lucky/sharvo.top cert) and dns nameserver-policy "+.sharvo.top"), merged when config.yaml is generated
+# secrets:    NOT in this template (public repo): trojan-home password + sharvo.top certificate paths + dns policy "+.sharvo.top" (router /etc/nikki/mixin.yaml)
+#               and controller secret/authentication (uci) - merged in on the router when nikki generates config.yaml
 # serve:      /sub?target=clash&url=<subscription-url>&config=<path-or-url-to clash_router.ini>
 port: 8080
 socks-port: 1080
@@ -464,6 +464,14 @@ rules:
   - IP-CIDR6,fe80::/10,DIRECT,no-resolve
   - IP-CIDR6,fd00::/8,DIRECT,no-resolve
   - MATCH,Final
+listeners:
+  - name: trojan-home
+    type: trojan
+    listen: "::"
+    port: 8444
+    users:
+      - username: home
+    proxy: DIRECT
 rule-providers:
   ls-direct:
     type: http
