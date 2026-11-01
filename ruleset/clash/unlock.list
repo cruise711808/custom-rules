@@ -1,0 +1,20 @@
+DOMAIN,api.miwifi.com
+
+# router OpenAI egress rules (from clash-router, 2026-11-01)
+DOMAIN,browser-intake-us5-datadoghq.com
+DOMAIN,cdn.usefathom.com
+DOMAIN-SUFFIX,statsigapi.net
+DOMAIN-KEYWORD,datadog
+DOMAIN-KEYWORD,sift
+DOMAIN-KEYWORD,aiplatform.googleapis.com
+DOMAIN,browser-intake-datadoghq.com
+DOMAIN,openai-api.arkoselabs.com
+DOMAIN-SUFFIX,ai.com
+DOMAIN-SUFFIX,algolia.net
+DOMAIN-SUFFIX,api.statsig.com
+DOMAIN-SUFFIX,client-api.arkoselabs.com
+DOMAIN-SUFFIX,events.statsigapi.net
+DOMAIN-SUFFIX,featuregates.org
+DOMAIN-SUFFIX,launchdarkly.com
+DOMAIN-SUFFIX,observeit.net
+DOMAIN-KEYWORD,openai
