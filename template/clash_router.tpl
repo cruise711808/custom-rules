@@ -552,6 +552,7 @@ rule-providers:
   block:
     type: http
     url: https://cdn.jsdelivr.net/gh/cruise711808/custom-rules@main/ruleset/clash/block.list
+    path: rules/block.list
     size_limit: "0"
     format: text
     behavior: domain
