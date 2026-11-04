@@ -1,0 +1,6 @@
+own_domain=<own-domain>
+home_trojan_host=proxy.<own-domain>
+home_trojan_port=8443
+home_trojan_password=REPLACE_ME
+home_lan_cidr=192.168.10.0/24
+home_router_ip=192.168.10.1

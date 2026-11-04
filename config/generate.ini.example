@@ -1,0 +1,5 @@
+[mihomo]
+path=D:/Program/subconverter/output/mihomo.yaml
+target=clash
+url=https://api.sub.example.com/sub?target=clash&insert=true&emoji=true&udp=true&clash.doh=true&new_name=true&filename=mihomo.yaml&url=https%3A%2F%2Fapi.cdn.example.com%2Fosubscribe.php%3Ftoken2%3DREPLACE_ME
+config=F:/Projects/custom-rules/template/Server_Clash_Linux.ini

@@ -1,0 +1,5 @@
+[surfboard]
+path=D:/Program/subconverter/output/surfboard_mobile.conf
+target=surfboard
+url=D:/Program/subconverter/output/mihomo.yaml
+config=F:/Projects/custom-rules/template/Client_Surfboard_Android.ini
