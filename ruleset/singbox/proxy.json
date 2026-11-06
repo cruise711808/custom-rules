@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 5,
   "rules": [
     {
       "domain": [
@@ -8,19 +8,51 @@
         "mypikpak.net",
         "user.mypikpak.com",
         "access.mypikpak.com",
-        "gofile.io"
+        "gofile.io",
+        "clubhouse.pubnubapi.com"
       ],
       "domain_suffix": [
         "xn--ngstr-lra8j.com",
         "services.googleapis.cn",
         "ajay.app",
-        "returnyoutubedislikeapi.com",
         "qichiyu.com",
         "vivaldi.net",
-        "unraid.net",
-        "f95zone.to"
+        "f95zone.to",
+        "box.com",
+        "earthcam.com",
+        "ftimg.net",
+        "githack.com",
+        "istockphoto.com",
+        "medibang.com",
+        "mixlr.com",
+        "myspace.com",
+        "pcloud.com",
+        "smartmailcloud.com",
+        "venturebeat.com",
+        "worldcat.org",
+        "aiv-delivery.net",
+        "amazon-adsystem.com",
+        "amazonuniversity.jobs",
+        "awscloud.com",
+        "serving-sys.com",
+        "coincheck.com",
+        "liquid.com",
+        "sushi.com",
+        "readyatdawn.com",
+        "newyorktimes.com",
+        "nytlog.com",
+        "twimg.co",
+        "aicoin.com",
+        "ifixit.com"
       ],
-      "domain_regex": []
+      "domain_keyword": [
+        "avoddashs",
+        ".blogspot.",
+        ".facebook.",
+        ".pinterest."
+      ],
+      "domain_regex": [],
+      "ip_cidr": []
     }
   ]
 }

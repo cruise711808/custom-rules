@@ -1,8 +1,10 @@
 {
-  "version": 1,
+  "version": 5,
   "rules": [
     {
       "domain": [
+        "api-drive.mypikpak.com",
+        "mega.nz",
         "ssl-lvlt.cdn.ea.com",
         "origin-a.akamaihd.net",
         "uplaypc-s-ubisoft.cdn.ubionline.com.cn",
@@ -20,9 +22,7 @@
         "xvcf1.xboxlive.com",
         "xvcf2.xboxlive.com",
         "assets1.xboxlive.com",
-        "assets2.xboxlive.com",
-        "api-drive.mypikpak.com",
-        "mega.nz"
+        "assets2.xboxlive.com"
       ],
       "domain_suffix": [
         "dyn.riotcdn.net",
@@ -31,9 +31,8 @@
       "domain_keyword": [
         "dl-a10b-"
       ],
-      "domain_regex": [
-        "^file.*\\.gofile\\.io$"
-      ]
+      "domain_regex": [],
+      "ip_cidr": []
     }
   ]
 }

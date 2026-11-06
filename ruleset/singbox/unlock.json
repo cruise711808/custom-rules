@@ -1,0 +1,35 @@
+{
+  "version": 5,
+  "rules": [
+    {
+      "domain": [
+        "api.miwifi.com",
+        "browser-intake-us5-datadoghq.com",
+        "cdn.usefathom.com",
+        "browser-intake-datadoghq.com",
+        "openai-api.arkoselabs.com"
+      ],
+      "domain_suffix": [
+        "statsigapi.net",
+        "ai.com",
+        "algolia.net",
+        "api.statsig.com",
+        "client-api.arkoselabs.com",
+        "events.statsigapi.net",
+        "featuregates.org",
+        "launchdarkly.com",
+        "observeit.net"
+      ],
+      "domain_keyword": [
+        "datadog",
+        "sift",
+        "aiplatform.googleapis.com",
+        "openai",
+        "civitai",
+        "f95zone"
+      ],
+      "domain_regex": [],
+      "ip_cidr": []
+    }
+  ]
+}

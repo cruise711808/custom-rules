@@ -1,3 +1,5 @@
 config/generate.ini
 config/generate_client.ini
 config/local.ini
+config/Flower_Trojan.yaml
+config/router-profile.js
