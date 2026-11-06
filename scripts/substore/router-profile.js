@@ -13,6 +13,7 @@ var CONF = {
   homeTrojanPort: 8443,                 // local.ini: home_trojan_port（lucky 前置）
   homeTrojanPass: '<trojan-password>',  // local.ini: home_trojan_password
   certDir: '/etc/ssl/lucky',
+  caPath: '/etc/ssl/cert.pem',  // 系统 CA bundle（musl-cgo sing-box 不自动读，显式指定）
   apiSecret: '215530',
   ruleset: 'https://cdn.jsdelivr.net/gh/cruise711808/custom-rules@main/ruleset/singbox',
   includeRemark: '专线'
@@ -60,15 +61,17 @@ function transformFunction($response, $context) {
     ci = qs.lastIndexOf(':');
     host = qs.slice(0, ci);
     port = parseInt(qs.slice(ci + 1), 10);
-    pass = decodeURIComponent(head.slice(0, head.lastIndexOf('@') + 1).slice(0, -1));
+    pass = decodeURIComponent(head); // head 已不含 @（@ 前即 password，URI 编码）
     sni = '';
+    var insecure = false;
     qa = q ? q.split('&') : [];
     for (qi = 0; qi < qa.length; qi++) {
       kv = qa[qi].split('=');
       if (kv[0] === 'sni') sni = decodeURIComponent(kv[1] || '');
+      if (kv[0] === 'allowInsecure' && /^(1|true)$/i.test(kv[1] || '')) insecure = true; // 专线自签证书按订阅语义跳过校验
     }
     var ob = { type: "trojan", tag: name, server: host, server_port: port, password: pass };
-    if (sni) ob.tls = { enabled: true, server_name: sni };
+    if (sni) ob.tls = { enabled: true, server_name: sni, insecure: insecure, certificate_path: CONF.caPath };
     nodes.push(ob);
   }
 
@@ -105,7 +108,7 @@ function transformFunction($response, $context) {
   ];
   var outbounds = [{ type: 'direct', tag: 'direct' }, {
     type: 'trojan', tag: 'Home-Trojan', server: CONF.homeTrojanHost, server_port: CONF.homeTrojanPort,
-    password: CONF.homeTrojanPass, tls: { enabled: true, server_name: CONF.homeTrojanHost }
+    password: CONF.homeTrojanPass, tls: { enabled: true, server_name: CONF.homeTrojanHost, certificate_path: CONF.caPath }
   }];
   for (i = 0; i < nodes.length; i++) outbounds.push(nodes[i]);
   for (i = 0; i < groupDefs.length; i++) {
@@ -129,6 +132,9 @@ function transformFunction($response, $context) {
   /* ---------- 静态内联规则（迁自 Server_Clash_Linux.tpl，PROCESS-* 因 redirect/tproxy 无进程信息而去除；1.14 规则集引用用 tag:id 查询语法） ---------- */
   function R(o) { return o; }
   var rules = [
+    /* DNS 收口：dns-in（AGH 上游, 无 53 端口特征按 inbound）+ redirect/tproxy（原始 53 协议特征） */
+    R({ inbound: 'dns-in', action: 'hijack-dns' }),
+    R({ protocol: ['dns'], action: 'hijack-dns' }),
     /* 防回环：trojan 入口 + 自身域名 + v.lan + 家网段 */
     R({ inbound: 'trojan-home', action: 'route', outbound: 'direct' }),
     R({ domain_suffix: '.' + CONF.ownDomain, action: 'route', outbound: 'direct' }),
@@ -139,13 +145,13 @@ function transformFunction($response, $context) {
     R({ rule_set: 'rs-download', action: 'route', outbound: 'DL' }),
     R({ rule_set: 'rs-oversea', action: 'route', outbound: 'Oversea' }),
     R({ rule_set: 'rs-unlock', action: 'route', outbound: 'Unlock' }),
-    R({ rule_set: 'geosite:category-porn', action: 'route', outbound: 'Oversea' }),
+    R({ rule_set: 'geosite-category-porn', action: 'route', outbound: 'Oversea' }),
     R({ rule_set: 'rs-proxy', action: 'route', outbound: 'Proxy' }),
-    R({ rule_set: 'geosite:category-games@cn', action: 'route', outbound: 'direct' }),
-    R({ rule_set: 'geosite:youtube', action: 'route', outbound: 'YouTube' }),
-    R({ rule_set: 'geosite:category-ai-chat-!cn', action: 'route', outbound: 'OpenAI' }),
-    R({ rule_set: 'geosite:github', action: 'route', outbound: 'Proxy' }),
-    R({ rule_set: 'geosite:category-games', action: 'route', outbound: 'Proxy' }),
+    R({ rule_set: 'geosite-category-games-cn', action: 'route', outbound: 'direct' }),
+    R({ rule_set: 'geosite-youtube', action: 'route', outbound: 'YouTube' }),
+    R({ rule_set: 'geosite-category-ai-chat-!cn', action: 'route', outbound: 'OpenAI' }),
+    R({ rule_set: 'geosite-github', action: 'route', outbound: 'Proxy' }),
+    R({ rule_set: 'geosite-category-games', action: 'route', outbound: 'Proxy' }),
     /* YouTube IP */
     R({ ip_cidr: ['172.110.32.0/21', '216.73.80.0/20', '2620:120:e000::/40'], action: 'route', outbound: 'YouTube' }),
     /* Bilibili（PROCESS-* 已去除） */
@@ -162,11 +168,11 @@ function transformFunction($response, $context) {
     /* Telegram */
     R({ domain_suffix: ['stel.com'], action: 'route', outbound: 'Telegram' }),
     R({ domain_keyword: ['nicegram'], action: 'route', outbound: 'Telegram' }),
-    R({ rule_set: 'geoip:telegram', action: 'route', outbound: 'Telegram' }),
+    /* Telegram 官方网段兜底（geoip 域库改 DLC srs 后不再有 telegram 码） */
+    R({ ip_cidr: ['91.108.0.0/16', '149.54.167.0/22', '185.76.151.0/24'], action: 'route', outbound: 'Telegram' }),
     /* Google */
     R({ domain_suffix: ['adsensecustomsearchads.com', 'adsenseformobileapps.com', 'advertiserscommunity.com', 'adwords-community.com', 'adwords.com', 'adwordsexpress.com', 'app-measurement.net', 'chromercise.com', 'digitalattackmap.com', 'doubleclick.com', 'download.qatp1.net', 'googleadapis.com', 'monitoring.qpdp1.net', 'neverware.com', 'oasisfeng.com', 'qagpublic.qatp1.net', 'qgadmin.qcpp1.net', 'qualysapi.qatp1.net', 'qualysguard.qpdp1.net', 'scanservice1.qcpp1.net'], action: 'route', outbound: 'Google' }),
     R({ domain_keyword: ['appspot', 'blogspot', 'recaptcha'], action: 'route', outbound: 'Google' }),
-    R({ rule_set: 'geoip:google', action: 'route', outbound: 'Google' }),
     /* Microsoft（PROCESS-* 已去除） */
     R({ domain_suffix: ['acompli.com', 'acompli.net', 'aicscience.com', 'assets-yammer.com', 'azure-apim.net', 'azurerms.com', 'bbing.com', 'bibg.com', 'biing.com', 'binb.com', 'binf.com', 'bing135.com', 'bing4.com', 'bingads.com', 'binginternal.com', 'bingit.net', 'bingiton.com', 'bingj.com', 'bingpix.com', 'bingpk.com', 'bings.com', 'bingtoolbar.com', 'bingtranslator.com', 'biying.com', 'cs11.wpc.v0cdn.net', 'cs9.wac.phicdn.net', 'discoverbing.com', 'dwh5.com', 'e-msedge.net', 'evoke-windowsservices-tas.msedge', 'explorebing.com', 'getmicrosoftkey.com', 'groupme.com', 'helpshift.com', 'here.com', 'here.net', 'hockeyapp.net', 'joinms.com', 'joinmva.com', 'localytics.com', 'lync.com', 'mapblast.com', 'mappoint.com', 'mesh.com', 'microsoft-tst.com', 'microsoft.com.nsatc.net', 'microsoftads.com', 'microsoftemail.com', 'microsoftestore.com.hk', 'microsoftol.com', 'microsoftonline-p.net', 'microsoftusercontent.com', 'msads.net', 'msappproxy.net', 'msauthimages.net', 'msftidentity.com', 'msignitechina.com', 'msn.com.nsatc.net', 'msnmaps.com', 'msvevent.com', 'msxiaobing.com', 'msxiaoice.com', 'myhomemsn.com', 'oaspapps.com', 'officeppe.net', 'onecollector.cloudapp.aria', 'onmicrosoft.com', 'optimizely.com', 'osdinfra.net', 'outlookmobile.com', 'phonefactor.net', 'playfabcn.com', 'renlifang.com', 'sclive.net', 'skypeforbusiness.com', 'sway-extensions.com', 'uservoice.com', 'vip5.afdorigin-prod-am02.afdogw.com', 'windows-ppe.net', 'wlxrs.com', 'working-bing-int.com', 'wunderlist.com', 'yammerusercontent.com'], action: 'route', outbound: 'Microsoft' }),
     R({ domain_keyword: ['onedrive', 'skydrive'], action: 'route', outbound: 'Microsoft' }),
@@ -182,16 +188,13 @@ function transformFunction($response, $context) {
     /* Amazon/Line 等 → Proxy（tpl IP-CIDR 兜底段） */
     R({ ip_cidr: ['13.32.0.0/15', '13.35.0.0/17', '18.184.0.0/15', '18.194.0.0/15', '18.208.0.0/13', '18.232.0.0/14', '52.200.0.0/13', '52.58.0.0/15', '52.74.0.0/16', '52.77.0.0/16', '52.84.0.0/15', '54.156.0.0/14', '54.226.0.0/15', '54.230.156.0/22', '54.93.0.0/16', '103.2.30.0/23', '125.209.208.0/20', '147.92.128.0/17', '203.104.144.0/21', '109.239.140.0/24', '5.28.195.163/32', '5.28.195.205/32', '5.28.195.37/32', '91.108.0.0/16'], action: 'route', outbound: 'Proxy' }),
     R({ ip_cidr: ['182.254.116.0/24', '203.205.238.0/23', '203.205.254.0/23'], action: 'route', outbound: 'direct' }),
-    /* Loyalsoldier → sing-geosite.db id 等价（1.14 tag:id 查询）；tld-not-cn 自托管 source json */
-    R({ rule_set: 'geosite:private', action: 'route', outbound: 'direct' }),
-    R({ rule_set: 'geosite:apple', action: 'route', outbound: 'direct' }),
-    R({ rule_set: 'geosite:icloud', action: 'route', outbound: 'direct' }),
-    R({ rule_set: 'geosite:google', action: 'route', outbound: 'direct' }),
-    R({ rule_set: 'geosite:direct', action: 'route', outbound: 'direct' }),
-    R({ rule_set: 'geosite:proxy', action: 'route', outbound: 'Proxy' }),
-    R({ rule_set: 'geosite:gfw', action: 'route', outbound: 'Proxy' }),
+    /* 兜底段：geosite(DLC srs) 私网/苹果/iCloud/Google → direct；geoip-cn → direct；tld-not-cn → Proxy */
+    R({ rule_set: 'geosite-private', action: 'route', outbound: 'direct' }),
+    R({ rule_set: 'geosite-apple', action: 'route', outbound: 'direct' }),
+    R({ rule_set: 'geosite-icloud', action: 'route', outbound: 'direct' }),
+    R({ rule_set: 'geosite-google', action: 'route', outbound: 'direct' }),
     R({ rule_set: 'ls-tld-not-cn', action: 'route', outbound: 'Proxy' }),
-    R({ rule_set: 'geoip:cn', action: 'route', outbound: 'direct' }),
+    R({ rule_set: 'geoip-cn', action: 'route', outbound: 'direct' }),
     R({ ip_cidr: ['192.168.0.0/16', '10.0.0.0/8', '172.16.0.0/12', '127.0.0.0/8', '100.64.0.0/10', '::1/128', 'fc00::/7', 'fe80::/10', 'fd00::/8'], action: 'route', outbound: 'direct' })
   ];
 
@@ -205,10 +208,15 @@ function transformFunction($response, $context) {
     remote('rs-oversea', 'source', CONF.ruleset + '/oversea.json'),
     remote('rs-unlock', 'source', CONF.ruleset + '/unlock.json'),
     remote('rs-proxy', 'source', CONF.ruleset + '/proxy.json'),
-    remote('ls-tld-not-cn', 'source', CONF.ruleset + '/tld-not-cn.json'),
-    remote('geosite', 'binary', 'https://cdn.jsdelivr.net/gh/SagerNet/sing-geosite@release/geosite.db'),
-    remote('geoip', 'binary', 'https://cdn.jsdelivr.net/gh/SagerNet/sing-geoip@release/geoip.db')
+    remote('ls-tld-not-cn', 'source', CONF.ruleset + '/tld-not-cn.json')
   ];
+  /* DLC 官方 srs（每周五自动构建 rule-set 分支，jsdelivr 直连可达） */
+  var GS = 'https://cdn.jsdelivr.net/gh/SagerNet/sing-geosite@rule-set';
+  var geoSiteCodes = ['category-porn', 'category-games-cn', 'youtube', 'category-ai-chat-!cn', 'github', 'category-games', 'private', 'apple', 'icloud', 'google'];
+  for (i = 0; i < geoSiteCodes.length; i++) {
+    ruleSets.push(remote('geosite-' + geoSiteCodes[i], 'binary', GS + '/geosite-' + geoSiteCodes[i] + '.srs'));
+  }
+  ruleSets.push(remote('geoip-cn', 'binary', 'https://cdn.jsdelivr.net/gh/SagerNet/sing-geoip@rule-set/geoip-cn.srs'));
 
   /* ---------- profile ---------- */
   var profile = {
@@ -218,14 +226,14 @@ function transformFunction($response, $context) {
         /* boot=dnsmasq:54（钉死真上游，不走 AGH:53→7874 回环） */
         { type: 'udp', tag: 'boot', server: '127.0.0.1', server_port: 54 },
         { type: 'udp', tag: 'lan-dns', server: CONF.routerIP, server_port: 54 },
-        { type: 'https', tag: 'doh-global', server: 'dns.google', detour: 'Proxy' }
+        { type: 'https', tag: 'doh-global', server: 'dns.google', detour: 'Proxy', tls: { enabled: true, certificate_path: CONF.caPath } }
       ],
       rules: [
         { domain: ['dns.google'], action: 'route', server: 'boot' },
         { domain_suffix: ['.' + CONF.ownDomain], action: 'route', server: 'boot' },
         { domain_suffix: ['lan'], action: 'route', server: 'lan-dns' },
         { action: 'evaluate', server: 'boot' },
-        { match_response: true, rule_set: ['geoip'], action: 'route', server: 'boot' }
+        { match_response: true, rule_set: ['geoip-cn'], action: 'route', server: 'boot' }
       ],
       final: 'doh-global',
       strategy: 'prefer_ipv4'
